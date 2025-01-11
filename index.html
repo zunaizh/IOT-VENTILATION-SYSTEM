@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IOT VENTILATION SYSTEM DASHBOARD</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px auto;
+      width: 300px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>IOT VENTILATION SYSTEM DASHBOARD</h1>
+  <div class="card">
+    <h3>Sensor Data</h3>
+    <p>Temperature: <span id="temperature">--</span> °C</p>
+    <p>Humidity: <span id="humidity">--</span> %</p>
+  </div>
+  <div class="card">
+    <h3>Fan Control</h3>
+    <button id="toggleFan">Toggle Fan</button>
+    <p>Status: <span id="fanStatus">--</span></p>
+  </div>
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, onValue, get, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDhtu5oCTjj91L0tiPehUEi2EtNdB9kioM",
+      authDomain: "test2-7f321.firebaseapp.com",
+      databaseURL: "https://test2-7f321-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "test2-7f321",
+      storageBucket: "test2-7f321.firebasestorage.app",
+      messagingSenderId: "605317390077",
+      appId: "1:605317390077:web:54b921fc152a3012ae6894"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Get references to DOM elements
+    const temperatureEl = document.getElementById('temperature');
+    const humidityEl = document.getElementById('humidity');
+    const fanStatusEl = document.getElementById('fanStatus');
+    const toggleFanButton = document.getElementById('toggleFan');
+
+    // Fetch sensor data in real-time
+    const temperatureRef = ref(database, '/temperature');
+    onValue(temperatureRef, (snapshot) => {
+      const temperature = snapshot.val();
+      temperatureEl.textContent = temperature ? temperature.toFixed(2) : "--";
+      console.log("Temperature data:", temperature);
+    });
+
+    const humidityRef = ref(database, '/humidity');
+    onValue(humidityRef, (snapshot) => {
+      const humidity = snapshot.val();
+      humidityEl.textContent = humidity ? humidity.toFixed(2) : "--";
+      console.log("Humidity data:", humidity);
+    });
+
+    // Fetch fan status in real-time
+    const fanControlRef = ref(database, '/fan_control');
+    onValue(fanControlRef, (snapshot) => {
+      const fanStatus = snapshot.val() ? 'ON' : 'OFF';
+      fanStatusEl.textContent = fanStatus;
+      console.log("Fan control data:", snapshot.val());
+    });
+
+    // Toggle fan control
+    toggleFanButton.addEventListener('click', async () => {
+      const snapshot = await get(fanControlRef);
+      const currentStatus = snapshot.val();
+      await set(fanControlRef, !currentStatus);
+      console.log("Fan toggled to:", !currentStatus);
+    });
+  </script>
+</body>
+</html>
